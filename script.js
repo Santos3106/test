@@ -1,12 +1,15 @@
-// Firebase Modular SDK
+// Import Firebase SDK
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-// Your Firebase config (from your console)
+// Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyAjiIPMhyXpl8L-bfzdQo-yGfD2DhFy4DQ",
   authDomain: "login-register-a6dee.firebaseapp.com",
-  databaseURL: "https://login-register-a6dee-default-rtdb.firebaseio.com",
   projectId: "login-register-a6dee",
   storageBucket: "login-register-a6dee.appspot.com",
   messagingSenderId: "807873909453",
@@ -15,49 +18,37 @@ const firebaseConfig = {
 
 // Init Firebase
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+const auth = getAuth(app);
 
-// Register
-document.getElementById("registerForm").addEventListener("submit", function (e) {
+// Register user
+document.getElementById("registerForm").addEventListener("submit", (e) => {
   e.preventDefault();
   const email = document.getElementById("registerEmail").value;
   const password = document.getElementById("registerPassword").value;
 
-  const userRef = ref(db, "users/" + email.replace(/\./g, "_"));
-  set(userRef, {
-    email,
-    password
-  })
-    .then(() => {
-      alert("Registered successfully!");
+  createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      alert("Registered Successfully!");
+      console.log(userCredential.user);
     })
-    .catch((err) => {
-      alert("Error: " + err.message);
+    .catch((error) => {
+      alert("Error: " + error.message);
     });
 });
 
-// Login
-document.getElementById("loginForm").addEventListener("submit", function (e) {
+// Login user
+document.getElementById("loginForm").addEventListener("submit", (e) => {
   e.preventDefault();
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
 
-  const userRef = ref(db);
-  get(child(userRef, "users/" + email.replace(/\./g, "_")))
-    .then((snapshot) => {
-      if (snapshot.exists()) {
-        const user = snapshot.val();
-        if (user.password === password) {
-          alert("Login successful!");
-          // window.location.href = "dashboard.html"; // optional
-        } else {
-          alert("Wrong password.");
-        }
-      } else {
-        alert("User not found.");
-      }
+  signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      alert("Login Successful!");
+      console.log(userCredential.user);
+      // window.location.href = "dashboard.html"; // Optional
     })
-    .catch((err) => {
-      alert("Error: " + err.message);
+    .catch((error) => {
+      alert("Login Error: " + error.message);
     });
 });
